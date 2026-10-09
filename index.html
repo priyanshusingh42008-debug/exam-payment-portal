@@ -1,0 +1,21 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Examination Payment Portal</title><link rel="stylesheet" href="styles.css"></head><body>
+<header><div class="brand"><div class="logo">EP</div><div><b>Examination Payment Portal</b><small>Secure fee collection</small></div></div><a href="admin.html">Admin</a></header>
+<main>
+<section class="hero"><span>EXAMINATION REGISTRATION</span><h1>Complete your examination fee payment</h1><p>Submit your payment reference after paying the examination registration fee.</p></section>
+<div class="layout">
+<section class="card"><h2>Student details</h2>
+<div class="amount"><span>Examination registration fee</span><strong>₹2,500</strong></div>
+<label>Student name<input id="name" placeholder="Enter your full name"></label>
+<label>Enrollment / Roll number<input id="roll" placeholder="Enter your enrollment number"></label>
+<label>Transaction reference / UTR<input id="utr" placeholder="Enter UTR after payment"></label>
+<button id="submit">Submit payment details</button><div id="msg"></div></section>
+<section class="card"><div class="row"><h2>Scan & pay</h2><b class="tag">UPI</b></div>
+<div class="qr"><img src="payment-qr.jpg" alt="Payment QR"></div>
+<p class="center">Scan using your UPI app and pay exactly ₹2,500.</p>
+<div class="warning">Verify the recipient name and UPI details shown in your payment app before confirming. This QR must only be used where the account holder is authorized to collect the fee.</div></section>
+</div>
+<section class="card steps"><h2>Payment process</h2><div class="stepsgrid"><div><b>01</b><span>Scan and pay</span></div><div><b>02</b><span>Copy your UTR/reference</span></div><div><b>03</b><span>Submit for verification</span></div><div><b>04</b><span>Download receipt after approval</span></div></div></section>
+<footer>Payment verification is performed by the authorized account administrator.</footer>
+</main><script src="app.js"></script></body></html>
