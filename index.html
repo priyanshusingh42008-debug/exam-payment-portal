@@ -1,21 +1,207 @@
-<!doctype html><html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Examination Payment Portal</title><link rel="stylesheet" href="styles.css"></head><body>
-<header><div class="brand"><div class="logo">EP</div><div><b>Examination Payment Portal</b><small>Secure fee collection</small></div></div><a href="admin.html">Admin</a></header>
-<main>
-<section class="hero"><span>EXAMINATION REGISTRATION</span><h1>Complete your examination fee payment</h1><p>Submit your payment reference after paying the examination registration fee.</p></section>
-<div class="layout">
-<section class="card"><h2>Student details</h2>
-<div class="amount"><span>Examination registration fee</span><strong>₹2,500</strong></div>
-<label>Student name<input id="name" placeholder="Enter your full name"></label>
-<label>Enrollment / Roll number<input id="roll" placeholder="Enter your enrollment number"></label>
-<label>Transaction reference / UTR<input id="utr" placeholder="Enter UTR after payment"></label>
-<button id="submit">Submit payment details</button><div id="msg"></div></section>
-<section class="card"><div class="row"><h2>Scan & pay</h2><b class="tag">UPI</b></div>
-<div class="qr"><img src="payment-qr.jpg" alt="Payment QR"></div>
-<p class="center">Scan using your UPI app and pay exactly ₹2,500.</p>
-<div class="warning">Verify the recipient name and UPI details shown in your payment app before confirming. This QR must only be used where the account holder is authorized to collect the fee.</div></section>
-</div>
-<section class="card steps"><h2>Payment process</h2><div class="stepsgrid"><div><b>01</b><span>Scan and pay</span></div><div><b>02</b><span>Copy your UTR/reference</span></div><div><b>03</b><span>Submit for verification</span></div><div><b>04</b><span>Download receipt after approval</span></div></div></section>
-<footer>Payment verification is performed by the authorized account administrator.</footer>
-</main><script src="app.js"></script></body></html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="CS EXAMs provides independent computer science and IT practice tests.">
+  <title>CS EXAMs | Practice Test Registration</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f7fb;
+      color: #182438;
+      line-height: 1.6;
+    }
+    .cs-header {
+      background: #10294b;
+      color: white;
+      padding: 18px 6%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .cs-brand { font-size: 25px; font-weight: 800; }
+    .cs-header a { color: white; text-decoration: none; margin-left: 16px; }
+    .cs-container { width: 92%; max-width: 950px; margin: 30px auto; }
+    .cs-hero {
+      background: linear-gradient(135deg, #10294b, #1767a8);
+      color: white;
+      padding: 38px 25px;
+      border-radius: 18px;
+    }
+    .cs-hero h1 { font-size: clamp(28px, 5vw, 42px); margin: 8px 0; }
+    .cs-label {
+      font-size: 12px;
+      font-weight: bold;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+    .cs-button {
+      display: inline-block;
+      border: 0;
+      border-radius: 9px;
+      padding: 12px 18px;
+      margin: 8px 8px 0 0;
+      background: #1767a8;
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 15px;
+    }
+    .cs-button-light { background: white; color: #10294b; }
+    .cs-card {
+      background: white;
+      border: 1px solid #e1e8f0;
+      border-radius: 15px;
+      padding: 24px;
+      margin-top: 20px;
+      box-shadow: 0 5px 20px #10294b0a;
+    }
+    .cs-price { font-size: 30px; font-weight: 800; color: #1767a8; }
+    .cs-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 15px; }
+    .cs-field { margin: 15px 0; }
+    .cs-field label { display: block; font-weight: bold; margin-bottom: 6px; }
+    .cs-field input {
+      width: 100%; padding: 12px; border: 1px solid #cbd5e1;
+      border-radius: 8px; font: inherit;
+    }
+    .cs-notice {
+      background: #fff7e6; border-left: 4px solid #d99a17;
+      padding: 12px; border-radius: 5px; font-size: 14px;
+    }
+    .cs-qr { display: block; width: 220px; max-width: 100%; height: auto; margin: 15px auto; }
+    .cs-center { text-align: center; }
+    .cs-footer { text-align: center; padding: 25px; color: #667085; font-size: 13px; }
+    #msg { overflow-wrap: anywhere; margin-top: 15px; }
+    .error { color: #b42318; }
+    .successbox { background: #eaf7ee; color: #176534; padding: 12px; border-radius: 8px; }
+    a { overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+  <header class="cs-header">
+    <div class="cs-brand">CS EXAMs</div>
+    <nav>
+      <a href="catalogue.html">Test Catalogue</a>
+      <a href="test-details.html">Test Details</a>
+    </nav>
+  </header>
+
+  <main class="cs-container">
+    <section class="cs-hero">
+      <div class="cs-label">Independent Practice Tests</div>
+      <h1>Learn. Practise. Improve.</h1>
+      <p>
+        Explore computer science and IT practice tests designed to help
+        candidates assess their knowledge and prepare for assessments.
+      </p>
+      <a class="cs-button cs-button-light" href="catalogue.html">Explore Tests</a>
+      <a class="cs-button cs-button-light" href="test-details.html">View Test Details</a>
+    </section>
+
+    <section class="cs-card">
+      <h2>About CS EXAMs</h2>
+      <p>
+        CS EXAMs is an independent computer science and IT practice-test
+        registration service. It is not affiliated with or authorised by
+        any college, university, or government examination authority.
+      </p>
+      <div class="cs-grid">
+        <div>
+          <h3>Practice and preparation</h3>
+          <p>Review the published test information before registering.</p>
+        </div>
+        <div>
+          <h3>Clear registration process</h3>
+          <p>Submit your details and payment reference for review.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cs-card">
+      <h2>Computer Science &amp; IT Practice Mock Test</h2>
+      <p class="cs-price">₹2,500 <span style="font-size:14px;font-weight:normal">per test</span></p>
+      <p>
+        Check the test details page for confirmed syllabus, duration,
+        schedule, delivery format, and terms before paying.
+      </p>
+      <a class="cs-button" href="test-details.html">Review Test Information</a>
+      <a class="cs-button" href="catalogue.html">Browse Catalogue</a>
+    </section>
+
+    <section class="cs-card">
+      <h2>Registration &amp; Payment Reference</h2>
+      <p>Complete the fields below only after reviewing the test details.</p>
+
+      <div class="cs-notice">
+        <strong>Important:</strong> Submitting a UTR/reference number does
+        not confirm payment. Your submission remains pending until the
+        authorised account administrator verifies the transaction.
+        Do not submit sensitive banking credentials or your UPI PIN.
+      </div>
+
+      <div class="cs-field">
+        <label for="name">Candidate full name</label>
+        <input id="name" name="name" type="text" maxlength="100"
+               autocomplete="name" placeholder="Enter your full name" required>
+      </div>
+
+      <div class="cs-field">
+        <label for="roll">Candidate / registration ID</label>
+        <input id="roll" name="roll" type="text" maxlength="100"
+               placeholder="Enter your candidate or registration ID" required>
+      </div>
+
+      <div class="cs-field">
+        <label for="utr">Payment UTR / reference number</label>
+        <input id="utr" name="utr" type="text" maxlength="120"
+               placeholder="Enter the reference shown by your payment app" required>
+      </div>
+
+      <button class="cs-button" id="submit" type="button">
+        Submit for Payment Verification
+      </button>
+      <div id="msg" role="status" aria-live="polite"></div>
+    </section>
+
+    <section class="cs-card cs-center">
+      <h2>Payment Instructions</h2>
+      <p>Use the QR code below only if the organiser has confirmed that this payment method is currently authorised and available.</p>
+      <img class="cs-qr" src="payment-qr.jpg" alt="CS EXAMs payment QR code">
+      <p><strong>Amount: ₹2,500</strong></p>
+      <p>Verify the recipient name and amount in your payment app before confirming any transaction.</p>
+      <p class="cs-notice">
+        Razorpay activation is still under review. This page does not
+        represent that Razorpay live payments have been approved.
+      </p>
+    </section>
+
+    <section class="cs-card">
+      <h2>Contact &amp; Policies</h2>
+      <p><strong>Service:</strong> CS EXAMs</p>
+      <p><strong>Email:</strong> <a href="mailto:priyanshusingh.42008@gmail.com">priyanshusingh.42008@gmail.com</a></p>
+      <p><strong>Phone:</strong> <a href="tel:7838242029">7838242029</a></p>
+      <p>
+        Before paying, read the published cancellation, refund, privacy,
+        and service terms. Contact the organiser if any material details
+        are missing or unclear.
+      </p>
+      <p><a href="status.html">Check payment submission status</a></p>
+    </section>
+  </main>
+
+  <footer class="cs-footer">
+    CS EXAMs — Independent computer science and IT practice tests.
+    Not an official college or government examination portal.
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
