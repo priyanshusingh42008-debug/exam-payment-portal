@@ -1,4 +1,22 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Payment Administration</title><link rel="stylesheet" href="styles.css"></head><body><header><div class="brand"><div class="logo">EP</div><div><b>Payment Administration</b><small>Authorized administrator area</small></div></div><a href="index.html">Portal</a></header><main><section class="card"><div class="row"><div><h1>Payment submissions</h1><p class="muted">Verify transactions against the authorized payment account before approving.</p></div><button class="refresh" onclick="load()">Refresh</button></div><div class="tablewrap"><table><thead><tr><th>Student</th><th>Roll</th><th>UTR</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody id="rows"></tbody></table></div></section></main><script>
-async function load(){const a=await fetch("/api/payments").then(x=>x.json());document.getElementById("rows").innerHTML=a.length?a.map(p=>`<tr><td>${p.name}</td><td>${p.roll}</td><td>${p.utr}</td><td>₹${p.amount}</td><td><span class="pill ${p.status.toLowerCase()}">${p.status}</span></td><td><button onclick="setStatus('${p.id}','Verified')">Verify</button> <button class="reject" onclick="setStatus('${p.id}','Rejected')">Reject</button></td></tr>`).join(""):`<tr><td colspan="6">No submissions yet.</td></tr>`}
-async function setStatus(id,status){await fetch("/api/payments/"+id+"/status",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({status})});load()}load();
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CS EXAMs — Payment Administration</title><link rel="stylesheet" href="styles.css"></head><body>
+<header><div class="brand"><div class="logo">CS</div><div><b>CS EXAMs Administration</b><small>Authorised administrator area</small></div></div><a href="index.html">Portal</a></header>
+<main><section class="card"><h1>Payment records</h1><p class="muted">Enter the administrator password configured in Render to view private payment records.</p><label for="adminPassword">Administrator password</label><input id="adminPassword" type="password" autocomplete="current-password"><button id="login">Load payment records</button><p id="message" role="status"></p><div class="tablewrap"><table><thead><tr><th>Student</th><th>Registration ID</th><th>UTR / Payment ID</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody id="rows"></tbody></table></div></section></main>
+<script>
+let adminPassword="";
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+async function load(){
+ const message=document.getElementById("message");
+ try{
+  const r=await fetch("/api/admin/payments",{headers:{"x-admin-password":adminPassword}});
+  const data=await r.json(); if(!r.ok) throw new Error(data.error||"Could not load records.");
+  document.getElementById("rows").innerHTML=data.length?data.map(p=>'<tr><td>'+esc(p.name)+'</td><td>'+esc(p.roll)+'</td><td>'+esc(p.utr||p.paymentId||p.orderId)+'</td><td>₹'+esc(p.amount)+'</td><td>'+esc(p.status)+'</td><td>'+(p.paymentMethod==="Razorpay"?"Gateway verified automatically":'<button data-id="'+esc(p.id)+'" data-status="Verified">Verify</button> <button class="reject" data-id="'+esc(p.id)+'" data-status="Rejected">Reject</button>')+'</td></tr>').join(""):'<tr><td colspan="6">No records yet.</td></tr>';
+  message.textContent="Records loaded.";
+ }catch(e){message.textContent=e.message;document.getElementById("rows").innerHTML="";}
+}
+document.getElementById("login").addEventListener("click",()=>{adminPassword=document.getElementById("adminPassword").value;load();});
+document.getElementById("rows").addEventListener("click",async e=>{
+ const b=e.target.closest("button[data-id]");if(!b)return;
+ const r=await fetch("/api/admin/payments/"+encodeURIComponent(b.dataset.id)+"/status",{method:"POST",headers:{"Content-Type":"application/json","x-admin-password":adminPassword},body:JSON.stringify({status:b.dataset.status})});
+ const d=await r.json();document.getElementById("message").textContent=d.error||"Status updated.";if(r.ok)load();
+});
 </script></body></html>
