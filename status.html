@@ -1,5 +1,94 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Payment Status</title><link rel="stylesheet" href="styles.css"></head><body>
-<header><div class="brand"><div class="logo">EP</div><div><b>Examination Payment Portal</b><small>Payment status</small></div></div><a href="index.html">Home</a></header>
-<main><section class="card narrow"><h1>Payment status</h1><p class="muted">Enter your transaction reference to check its status.</p><input id="lookup" placeholder="Transaction reference / UTR"><button id="check">Check status</button><div id="result"></div></section></main><script>
-document.getElementById("check").onclick=async()=>{const u=document.getElementById("lookup").value.trim(),r=document.getElementById("result");if(!u){r.innerHTML="<p class='error'>Enter a reference.</p>";return}const all=await fetch("/api/payments").then(x=>x.json());const p=all.find(x=>x.utr.toLowerCase()===u.toLowerCase());if(!p){r.innerHTML="<p class='error'>No submission found.</p>";return}r.innerHTML=`<div class="statusbox"><b>${p.status}</b><p>${p.name} · ${p.roll}</p><p>Amount: ₹${p.amount}</p>${p.status==="Verified"?`<a class="buttonlink" href="receipt.html?id=${p.id}">Open receipt</a>`:""}</div>`}
-</script></body></html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CS EXAMs | Payment Status</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo">EP</div>
+      <div>
+        <b>CS EXAMs</b>
+        <small>Payment status</small>
+      </div>
+    </div>
+    <a href="index.html">Home</a>
+  </header>
+
+  <main>
+    <section class="card narrow">
+      <h1>Payment status</h1>
+      <p class="muted">Your registration and payment details.</p>
+      <div id="result" aria-live="polite">Loading status...</div>
+    </section>
+  </main>
+
+  <script>
+  (async () => {
+    const result = document.getElementById("result");
+    const token = new URLSearchParams(location.search).get("token");
+
+    if (!token) {
+      result.textContent = "No registration reference was provided.";
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        "/api/status/" + encodeURIComponent(token)
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Registration not found.");
+      }
+
+      const box = document.createElement("div");
+      box.className = "statusbox";
+
+      function addLine(label, value) {
+        const p = document.createElement("p");
+        const strong = document.createElement("strong");
+        strong.textContent = label + ": ";
+        p.appendChild(strong);
+        p.appendChild(document.createTextNode(String(value)));
+        box.appendChild(p);
+      }
+
+      const heading = document.createElement("h2");
+      heading.textContent = data.status;
+      box.appendChild(heading);
+
+      addLine("Candidate", data.name);
+      addLine("Registration ID", data.roll);
+      addLine("Amount", "₹" + data.amount);
+      addLine("Status", data.status);
+
+      if (data.receiptAvailable) {
+        const link = document.createElement("a");
+        link.href = "/receipt.html?token=" + encodeURIComponent(token);
+        link.textContent = "View payment receipt";
+        link.className = "buttonlink";
+        box.appendChild(link);
+      } else {
+        const note = document.createElement("p");
+        note.textContent =
+          "Payment is not yet confirmed. Please check again later.";
+        box.appendChild(note);
+      }
+
+      result.replaceChildren(box);
+
+    } catch (error) {
+      result.textContent = error.message;
+    }
+  })();
+  </script>
+</body>
+</html>
+
