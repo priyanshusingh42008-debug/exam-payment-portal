@@ -1,4 +1,193 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Payment Administration</title><link rel="stylesheet" href="styles.css"></head><body><header><div class="brand"><div class="logo">EP</div><div><b>Payment Administration</b><small>Authorized administrator area</small></div></div><a href="index.html">Portal</a></header><main><section class="card"><div class="row"><div><h1>Payment submissions</h1><p class="muted">Verify transactions against the authorized payment account before approving.</p></div><button class="refresh" onclick="load()">Refresh</button></div><div class="tablewrap"><table><thead><tr><th>Student</th><th>Roll</th><th>UTR</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody id="rows"></tbody></table></div></section></main><script>
-async function load(){const a=await fetch("/api/payments").then(x=>x.json());document.getElementById("rows").innerHTML=a.length?a.map(p=>`<tr><td>${p.name}</td><td>${p.roll}</td><td>${p.utr}</td><td>₹${p.amount}</td><td><span class="pill ${p.status.toLowerCase()}">${p.status}</span></td><td><button onclick="setStatus('${p.id}','Verified')">Verify</button> <button class="reject" onclick="setStatus('${p.id}','Rejected')">Reject</button></td></tr>`).join(""):`<tr><td colspan="6">No submissions yet.</td></tr>`}
-async function setStatus(id,status){await fetch("/api/payments/"+id+"/status",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({status})});load()}load();
-</script></body></html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CS EXAMs | Payment Administration</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .admin-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .admin-actions button { cursor: pointer; }
+    .tablewrap { overflow-x: auto; }
+    #message { margin: 12px 0; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo">EP</div>
+      <div>
+        <b>CS EXAMs Administration</b>
+        <small>Authorized administrator area</small>
+      </div>
+    </div>
+    <a href="index.html">Portal</a>
+  </header>
+
+  <main>
+    <section class="card">
+      <div class="row">
+        <div>
+          <h1>Payment registrations</h1>
+          <p class="muted">
+            Razorpay payments are verified automatically by the server.
+          </p>
+        </div>
+        <button id="refresh" type="button">Refresh</button>
+      </div>
+
+      <div id="message" role="status" aria-live="polite"></div>
+
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Candidate</th>
+              <th>Registration ID</th>
+              <th>Amount</th>
+              <th>Payment reference</th>
+              <th>Method</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="rows">
+            <tr><td colspan="7">Loading registrations...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script>
+  const rows = document.getElementById("rows");
+  const message = document.getElementById("message");
+  const refresh = document.getElementById("refresh");
+
+  function cell(value) {
+    const td = document.createElement("td");
+    td.textContent = String(value ?? "—");
+    return td;
+  }
+
+  async function setLegacyStatus(id, status) {
+    if (!confirm("Change this legacy payment status to " + status + "?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        "/api/payments/" + encodeURIComponent(id) + "/status",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status })
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Unable to update status.");
+      }
+
+      message.textContent = "Legacy payment status updated.";
+      await load();
+    } catch (error) {
+      message.textContent = error.message;
+    }
+  }
+
+  async function load() {
+    refresh.disabled = true;
+    message.textContent = "Loading...";
+    rows.replaceChildren();
+
+    try {
+      const response = await fetch("/api/payments");
+      
+      if (response.status === 401) {
+        throw new Error("Administrator login is required. Refresh and sign in when prompted.");
+      }
+
+      const data = await response.json();
+
+      if (!response.ok || !Array.isArray(data)) {
+        throw new Error(data.error || "Unable to load registrations.");
+      }
+
+      if (data.length === 0) {
+        const tr = document.createElement("tr");
+        const td = cell("No registrations yet.");
+        td.colSpan = 7;
+        tr.appendChild(td);
+        rows.appendChild(tr);
+      }
+
+      data.slice().reverse().forEach(payment => {
+        const tr = document.createElement("tr");
+
+        tr.appendChild(cell(payment.name));
+        tr.appendChild(cell(payment.roll));
+        tr.appendChild(cell("₹" + payment.amount));
+
+        tr.appendChild(cell(
+          payment.paymentId || payment.utr || payment.orderId || "—"
+        ));
+
+        tr.appendChild(cell(
+          payment.paymentMethod || (payment.utr ? "Manual UTR" : "—")
+        ));
+
+        tr.appendChild(cell(payment.status));
+
+        const action = document.createElement("td");
+        const actions = document.createElement("div");
+        actions.className = "admin-actions";
+
+        // Only legacy UTR records can use manual status controls.
+        if (!payment.orderId && payment.utr && payment.status === "Pending") {
+          const verify = document.createElement("button");
+          verify.textContent = "Verify legacy";
+          verify.addEventListener("click", () =>
+            setLegacyStatus(payment.id, "Verified")
+          );
+
+          const reject = document.createElement("button");
+          reject.textContent = "Reject legacy";
+          reject.addEventListener("click", () =>
+            setLegacyStatus(payment.id, "Rejected")
+          );
+
+          actions.append(verify, reject);
+        } else if (payment.orderId) {
+          actions.textContent = "Automatic verification";
+        } else {
+          actions.textContent = "No action";
+        }
+
+        action.appendChild(actions);
+        tr.appendChild(action);
+        rows.appendChild(tr);
+      });
+
+      message.textContent = "Loaded " + data.length + " registration(s).";
+
+    } catch (error) {
+      message.textContent = error.message;
+      const tr = document.createElement("tr");
+      const td = cell("Could not load payment records.");
+      td.colSpan = 7;
+      tr.appendChild(td);
+      rows.appendChild(tr);
+    } finally {
+      refresh.disabled = false;
+    }
+  }
+
+  refresh.addEventListener("click", load);
+  load();
+  </script>
+</body>
+</html>
