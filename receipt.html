@@ -1,3 +1,93 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Payment Receipt</title><link rel="stylesheet" href="styles.css"></head><body><main>
-<section class="card receipt"><div class="success">✓</div><h1>Payment receipt</h1><p class="muted">Payment verified by the authorized administrator.</p><div id="data"></div><button onclick="window.print()">Print / Save as PDF</button></section></main>
-<script>(async()=>{const id=new URLSearchParams(location.search).get("id");const d=document.getElementById("data");if(!id){d.innerHTML="<p class='error'>Missing receipt ID.</p>";return}const r=await fetch("/api/payments/"+id);const p=await r.json();if(p.status!=="Verified"){d.innerHTML="<p class='error'>This receipt is not available until payment is verified.</p>";return}d.innerHTML=`<div class="receiptgrid"><span>Student</span><b>${p.name}</b><span>Enrollment / Roll</span><b>${p.roll}</b><span>Amount</span><b>₹${p.amount}</b><span>UTR / Reference</span><b>${p.utr}</b><span>Status</span><b>Verified</b><span>Receipt ID</span><b>${p.id}</b></div>`})()</script></body></html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CS EXAMs | Payment Receipt</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .receipt { max-width: 650px; margin: 40px auto; }
+    .receiptgrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin: 25px 0;
+    }
+    .receiptgrid span { color: #667085; }
+    .success { color: #16803c; font-size: 38px; }
+    @media print {
+      button, header { display: none !important; }
+      body { background: white; }
+      .card { box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="card receipt">
+      <div class="success">✓</div>
+      <h1>Payment receipt</h1>
+      <p class="muted">CS EXAMs — Independent Practice Tests</p>
+      <div id="data">Loading receipt...</div>
+      <button id="print" onclick="window.print()" hidden>
+        Print / Save as PDF
+      </button>
+      <p><a href="index.html">Return to homepage</a></p>
+    </section>
+  </main>
+
+  <script>
+  (async () => {
+    const data = document.getElementById("data");
+    const token = new URLSearchParams(location.search).get("token");
+
+    if (!token) {
+      data.textContent = "Receipt reference is missing.";
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        "/api/receipt/" + encodeURIComponent(token)
+      );
+
+      const payment = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payment.error || "Receipt unavailable.");
+      }
+
+      const grid = document.createElement("div");
+      grid.className = "receiptgrid";
+
+      function addField(label, value) {
+        const title = document.createElement("span");
+        title.textContent = label;
+
+        const detail = document.createElement("strong");
+        detail.textContent = String(value ?? "Not available");
+
+        grid.append(title, detail);
+      }
+
+      addField("Candidate", payment.name);
+      addField("Registration ID", payment.roll);
+      addField("Amount paid", "₹" + payment.amount);
+      addField("Payment method", payment.paymentMethod);
+      addField("Payment ID", payment.paymentId);
+      addField("Status", payment.status);
+      addField("Receipt ID", payment.id);
+      addField("Payment date", new Date(payment.createdAt).toLocaleString("en-IN"));
+
+      data.replaceChildren(grid);
+      document.getElementById("print").hidden = false;
+
+    } catch (error) {
+      data.textContent = error.message;
+    }
+  })();
+  </script>
+</body>
+</html>
+
