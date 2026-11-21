@@ -76,13 +76,13 @@
       background: #fff7e6; border-left: 4px solid #d99a17;
       padding: 12px; border-radius: 5px; font-size: 14px;
     }
-    .cs-qr { display: block; width: 220px; max-width: 100%; height: auto; margin: 15px auto; }
     .cs-center { text-align: center; }
     .cs-footer { text-align: center; padding: 25px; color: #667085; font-size: 13px; }
     #msg { overflow-wrap: anywhere; margin-top: 15px; }
     .error { color: #b42318; }
     .successbox { background: #eaf7ee; color: #176534; padding: 12px; border-radius: 8px; }
     a { overflow-wrap: anywhere; }
+    button:disabled { opacity: .6; cursor: not-allowed; }
   </style>
 </head>
 <body>
@@ -120,7 +120,7 @@
         </div>
         <div>
           <h3>Clear registration process</h3>
-          <p>Submit your details and payment reference for review.</p>
+          <p>Submit your details and payment through the secure checkout.</p>
         </div>
       </div>
     </section>
@@ -137,50 +137,34 @@
     </section>
 
     <section class="cs-card">
-      <h2>Registration &amp; Payment Reference</h2>
-      <p>Complete the fields below only after reviewing the test details.</p>
+      <h2>Registration &amp; Payment</h2>
+      <p>Complete your details after reviewing the test information.</p>
 
       <div class="cs-notice">
-        <strong>Important:</strong> Submitting a UTR/reference number does
-        not confirm payment. Your submission remains pending until the
-        authorised account administrator verifies the transaction.
-        Do not submit sensitive banking credentials or your UPI PIN.
+        <strong>Important:</strong> The payment is processed through Razorpay.
+        Registration is confirmed only after the server verifies successful payment.
+        Never share your UPI PIN, password or banking credentials.
       </div>
 
       <div class="cs-field">
         <label for="name">Candidate full name</label>
         <input id="name" name="name" type="text" maxlength="100"
-               autocomplete="name" placeholder="Enter your full name" required>
+          autocomplete="name" placeholder="Enter your full name" required>
       </div>
 
       <div class="cs-field">
         <label for="roll">Candidate / registration ID</label>
         <input id="roll" name="roll" type="text" maxlength="100"
-               placeholder="Enter your candidate or registration ID" required>
+          placeholder="Enter your candidate or registration ID" required>
       </div>
 
-      <div class="cs-field">
-        <label for="utr">Payment UTR / reference number</label>
-        <input id="utr" name="utr" type="text" maxlength="120"
-               placeholder="Enter the reference shown by your payment app" required>
-      </div>
+      <p><strong>Amount payable: ₹2,500</strong></p>
 
       <button class="cs-button" id="submit" type="button">
-        Submit for Payment Verification
+        Pay ₹2,500 Securely
       </button>
-      <div id="msg" role="status" aria-live="polite"></div>
-    </section>
 
-    <section class="cs-card cs-center">
-      <h2>Payment Instructions</h2>
-      <p>Use the QR code below only if the organiser has confirmed that this payment method is currently authorised and available.</p>
-      <img class="cs-qr" src="payment-qr.jpg" alt="CS EXAMs payment QR code">
-      <p><strong>Amount: ₹2,500</strong></p>
-      <p>Verify the recipient name and amount in your payment app before confirming any transaction.</p>
-      <p class="cs-notice">
-        Razorpay activation is still under review. This page does not
-        represent that Razorpay live payments have been approved.
-      </p>
+      <div id="msg" role="status" aria-live="polite"></div>
     </section>
 
     <section class="cs-card">
@@ -193,7 +177,7 @@
         and service terms. Contact the organiser if any material details
         are missing or unclear.
       </p>
-      <p><a href="status.html">Check payment submission status</a></p>
+      <p><a href="status.html">Check payment status</a></p>
     </section>
   </main>
 
@@ -202,6 +186,11 @@
     Not an official college or government examination portal.
   </footer>
 
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
+
+
+
+
